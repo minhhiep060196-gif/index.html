@@ -1,2 +1,517 @@
-# index.html
-index.html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Vàng Thi Đua Lớp 5D</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4834d4; --xs: #eb4d4b; --tot: #0984e3; --dat: #20bf6b;
+            --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32;
+            --danger: #d63031; --gift: #6c5ce7; --card-bg: #ffffff;
+            --bg-global: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            /* Biến vị trí ảnh nền lấy từ code cũ */
+            --bg-head-pos: center; --bg-body-pos: center; --bg-rank-pos: center; --bg-gift-pos: center;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: var(--bg-global); background-size: cover; background-attachment: fixed;
+            background-position: var(--bg-body-pos); margin: 0; padding: 20px; min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .app-header {
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
+            padding: 25px; border-radius: 30px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px;
+            background-size: cover; background-position: var(--bg-head-pos);
+        }
+        
+        .header-title { font-size: 2.5rem; color: var(--primary); font-weight: 900; margin: 0; }
+
+        .nav-tabs { display: flex; justify-content: center; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 10px 18px; border: none; border-radius: 12px;
+            background: #fff; color: #444; font-weight: 700; cursor: pointer; transition: 0.3s;
+        }
+        .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        .tab-content { border-radius: 30px; padding: 15px; min-height: 400px; background-size: cover; }
+        #tab-rank { background-position: var(--bg-rank-pos); }
+        #tab-gift-shop { background-position: var(--bg-gift-pos); }
+
+        .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: var(--card-bg); border-radius: 25px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; border: 1px solid rgba(0,0,0,0.05); }
+        .card-name { font-size: 1.15rem; font-weight: 800; color: #1a1a1a; cursor: pointer; display: block; margin-bottom: 12px; text-decoration: underline; }
+        
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; background: rgba(0,0,0,0.03); padding: 12px; border-radius: 15px; margin-bottom: 15px; }
+        .stat-num { display: block; font-size: 1.3rem; font-weight: 900; }
+        .stat-lbl { font-size: 0.65rem; color: #555; font-weight: 700; }
+
+        .btn-panel { display: flex; justify-content: space-between; gap: 5px; }
+        .btn-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .btn-circ { width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; color: white; font-weight: bold; }
+        .btn-minus { background: #dfe6e9; color: #636e72; }
+        .btn-plus { background: var(--primary); }
+
+        .full-list { max-width: 900px; margin: 20px auto; background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .list-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; font-weight: 700; align-items: center; }
+        .section-title { color: var(--primary); font-size: 1.4rem; margin-bottom: 15px; border-left: 5px solid var(--primary); padding-left: 10px; margin-top: 25px; }
+        .hist-section { margin-top: 30px; border-top: 2px solid #eee; padding-top: 15px; }
+
+        .top3-stage { display: flex; justify-content: center; align-items: flex-end; gap: 15px; margin: 30px 0; }
+        .podium { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 180px; }
+        .podium-box { width: 100%; border-radius: 15px 15px 5px 5px; color: white; font-weight: 900; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .p1 { background: var(--gold); height: 150px; }
+        .p2 { background: var(--silver); height: 110px; }
+        .p3 { background: var(--bronze); height: 80px; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+        .modal-content { background: white; margin: 5% auto; padding: 25px; border-radius: 30px; width: 90%; max-width: 500px; }
+        .input-std { width: 100%; padding: 10px; margin: 5px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+        .hidden { display: none; }
+        .text-red { color: var(--danger) !important; }
+        .quick-tag { padding: 5px 10px; background: #f1f2f6; border-radius: 8px; font-size: 0.8rem; cursor: pointer; border: 1px solid #ddd; transition: 0.2s; }
+        .quick-tag:hover { background: var(--danger); color: white; }
+        
+        /* CSS cho icon đồng bộ */
+        #syncIcon { position: fixed; top: 10px; right: 10px; font-size: 12px; background: rgba(0,0,0,0.6); color: white; padding: 5px 12px; border-radius: 20px; display: none; z-index: 9999; }
+    </style>
+</head>
+<body>
+
+<div id="syncIcon">🔄 Đang đồng bộ...</div>
+
+<div class="container">
+    <div class="app-header" id="headerSection">
+        <h1 class="header-title" id="displayClassName">Bảng Vàng Lớp 5D</h1>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('main')">🏠 Trang Chủ</button>
+            <button class="tab-btn" onclick="showTab('rank')">🏆 Xếp Hạng</button>
+            <button class="tab-btn" onclick="showTab('penalty')">⚠️ Vi Phạm</button>
+            <button class="tab-btn" onclick="showTab('no-point')">😴 Chưa Điểm</button>
+            <button class="tab-btn" onclick="showTab('gift-shop')">🎁 Đổi Quà</button>
+            <button class="tab-btn" onclick="showTab('history')">📜 Lịch Sử & Top</button>
+            <button class="tab-btn" style="background:#f1f2f6" onclick="showTab('admin')">⚙️ Cài Đặt</button>
+        </div>
+    </div>
+
+    <div id="tab-main" class="tab-content">
+        <div class="student-grid" id="studentGrid"></div>
+    </div>
+
+    <div id="tab-rank" class="tab-content hidden">
+        <div class="nav-tabs">
+            <button class="tab-btn active" id="btnRankW" onclick="setRankType('week')">Tuần Này</button>
+            <button class="tab-btn" id="btnRankM" onclick="setRankType('month')">Tháng Này</button>
+            <button class="tab-btn" id="btnRankAll" onclick="setRankType('all')">Vinh Danh (Tổng)</button>
+        </div>
+        <div id="top3Area" class="top3-stage"></div>
+        <div id="rankListFull" class="full-list"></div>
+        <div id="resetRankBtnContainer" style="text-align: center; margin-top: 20px;"></div>
+    </div>
+
+    <div id="tab-penalty" class="tab-content hidden">
+        <div class="full-list">
+            <h2 style="text-align:center">⚠️ Quản Lý Lỗi Vi Phạm</h2>
+            <div id="penaltyStats" style="display:flex; gap:10px; margin-bottom:20px"></div>
+            <div id="penaltyStudentList"></div>
+        </div>
+    </div>
+
+    <div id="tab-no-point" class="tab-content hidden">
+        <div class="full-list" id="noPointView"></div>
+    </div>
+
+    <div id="tab-gift-shop" class="tab-content hidden">
+        <div class="full-list">
+            <h2 style="text-align:center">🎁 Cửa Hàng Đổi Quà</h2>
+            <div id="giftGrid" class="student-grid"></div>
+            <h3 style="margin-top:20px">Nhật ký đổi quà</h3>
+            <div id="redeemLogs"></div>
+        </div>
+    </div>
+
+    <div id="tab-history" class="tab-content hidden">
+        <div class="nav-tabs">
+            <button class="tab-btn active" id="btnHistLog" onclick="showHist('logs')">Nhật Ký Cộng/Trừ</button>
+            <button class="tab-btn" id="btnHistTop" onclick="showHist('prev')">Top & Vi Phạm</button>
+        </div>
+        <div class="full-list" id="historyView"></div>
+    </div>
+
+    <div id="tab-admin" class="tab-content hidden">
+        <div class="admin-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+            <div class="settings-card" style="background:white; padding:20px; border-radius:20px">
+                <h3>🎨 Giao Diện & Nền</h3>
+                <input type="text" id="clsInp" class="input-std" placeholder="Tên lớp...">
+                <button class="tab-btn" style="background:var(--primary); color:white; width:100%" onclick="upCls()">Lưu tên lớp</button>
+                <div style="margin:10px 0">
+                    <label>Google Script URL: <input type="text" id="scriptUrlInp" class="input-std" placeholder="Dán link App Script vào đây..." onchange="db.scriptUrl=this.value;save();"></label>
+                </div>
+                <div style="margin:15px 0">
+                    <label>Chủ đạo: <input type="color" id="cPri" onchange="upUI()"></label>
+                    <label>Ô HS: <input type="color" id="cCard" onchange="upUI()"></label><br>
+                    <label>Đạt: <input type="color" id="cDat" onchange="upUI()"></label>
+                    <label>Tốt: <input type="color" id="cTot" onchange="upUI()"></label>
+                    <label>X.Sắc: <input type="color" id="cXs" onchange="upUI()"></label>
+                </div>
+                <hr>
+                <small>Nền Header:</small> <input type="file" onchange="upBg(event, 'head')">
+                <input type="range" min="0" max="100" value="50" oninput="upPos('head', this.value)"><br>
+                <small>Nền Trang Chủ:</small> <input type="file" onchange="upBg(event, 'body')">
+                <input type="range" min="0" max="100" value="50" oninput="upPos('body', this.value)"><br>
+                <small>Nền Xếp Hạng:</small> <input type="file" onchange="upBg(event, 'tab-rank')">
+                <input type="range" min="0" max="100" value="50" oninput="upPos('tab-rank', this.value)"><br>
+                <small>Nền Đổi Quà:</small> <input type="file" onchange="upBg(event, 'tab-gift-shop')">
+                <input type="range" min="0" max="100" value="50" oninput="upPos('tab-gift-shop', this.value)">
+            </div>
+
+            <div class="settings-card" style="background:white; padding:20px; border-radius:20px">
+                <h3>👥 Quản Lý Học Sinh</h3>
+                <div style="display:flex; gap:5px">
+                    <input type="text" id="newSName" class="input-std" placeholder="Thêm HS mới...">
+                    <button class="tab-btn" style="background:var(--dat); color:white" onclick="addS()">Thêm</button>
+                </div>
+                <div style="margin-top:10px; padding:10px; border:1px dashed #ccc; border-radius:10px">
+                    <small><b>Dán danh sách (Mỗi dòng 1 tên):</b></small>
+                    <textarea id="bulkSName" class="input-std" rows="2" placeholder="Tên 1&#10;Tên 2..."></textarea>
+                    <button class="tab-btn" style="background:var(--tot); color:white; width:100%" onclick="addBulkS()">Cập nhật hàng loạt</button>
+                </div>
+                <div id="adminSList" style="max-height:180px; overflow-y:auto; margin-top:10px; border:1px solid #eee"></div>
+            </div>
+
+            <div class="settings-card" style="background:white; padding:20px; border-radius:20px">
+                <h3>🎁 Quản lý Quà</h3>
+                <input type="text" id="gN" class="input-std" placeholder="Tên quà...">
+                <input type="number" id="gP" class="input-std" placeholder="Điểm đổi...">
+                <input type="file" id="gI" class="input-std">
+                <button class="tab-btn" style="background:var(--gift); color:white; width:100%" onclick="addG()">Thêm Quà</button>
+                
+                <h3 style="margin-top:20px; color:var(--danger)">⚠️ Hệ Thống</h3>
+                <input type="password" id="adminPw" class="input-std" placeholder="Nhập mật khẩu xóa dữ liệu...">
+                <button class="tab-btn" style="background:var(--danger); color:white; width:100%" onclick="resetAllWithPw()">Xoá tất cả dữ liệu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="detailModal" class="modal"><div class="modal-content" id="modalBody"></div></div>
+<div id="penModal" class="modal"><div class="modal-content" style="padding:20px">
+    <h2 id="penModalTitle">Lịch sử lỗi</h2>
+    <div id="penModalList" style="max-height:300px; overflow-y:auto"></div>
+    <button class="tab-btn" style="width:100%; margin-top:15px" onclick="closeModal('penModal')">Đóng</button>
+</div></div>
+
+<script>
+    const DEFAULT_S = ["Nguyễn Quỳnh Anh", "Lê Tuấn Anh", "Phạm Gia Bảo", "Phạm Chí Dũng", "Tống Mỹ Duyên", "Lê Minh Đức", "Nguyễn Minh Hiếu", "Đào Quỳnh Hoa", "Lê Minh Hoàng", "Phạm Hùng", "Nguyễn Đức Huy", "Phạm Thị Quỳnh Hương", "Phạm Thu Hương", "Trần Thị Quỳnh Hương", "Hoàng Thảo My", "Trần Nhật Nam", "Nguyễn Hữu Nghị", "Phạm Văn Nhật", "Đỗ Quỳnh Như", "Trần Quang Sáng", "Nguyễn Anh Sang", "Nguyễn Công Thành", "Trần Thị Thu Thảo", "Nguyễn Anh Thư", "Vũ Thị Yến Trang", "Nguyễn Thị Trang", "Phạm Thị Quỳnh Trâm", "Lê Văn Truyền"];
+    const KEY = '5D_ULTIMATE_POS_SYNC';
+    const QUICK_ERRORS = ["Nói chuyện trong giờ", "Không làm bài tập", "Thiếu đồng phục", "Vi phạm nội quy trường/lớp", "Học sinh đánh nhau", "Ăn quà vặt"];
+
+    let db = JSON.parse(localStorage.getItem(KEY)) || {
+        cls: "Lớp 5D",
+        scriptUrl: "",
+        students: DEFAULT_S.map((name, i) => ({ id: Date.now() + i, name: name, history: [], penalties: [] })),
+        gifts: [], redeems: [],
+        cfg: { pri: '#4834d4', card: '#ffffff', dat: '#20bf6b', tot: '#0984e3', xs: '#eb4d4b' },
+        bgs: {}, pos: { head: 50, body: 50, 'tab-rank': 50, 'tab-gift-shop': 50 }
+    };
+
+    // Hàm save có tích hợp đồng bộ mây
+    function save() { 
+        localStorage.setItem(KEY, JSON.stringify(db)); 
+        if (db.scriptUrl) {
+            document.getElementById('syncIcon').style.display = 'block';
+            fetch(db.scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(db)
+            }).then(() => {
+                setTimeout(() => document.getElementById('syncIcon').style.display = 'none', 1000);
+            });
+        }
+    }
+
+    function apply() {
+        const r = document.documentElement.style;
+        r.setProperty('--primary', db.cfg.pri);
+        r.setProperty('--card-bg', db.cfg.card);
+        r.setProperty('--dat', db.cfg.dat);
+        r.setProperty('--tot', db.cfg.tot);
+        r.setProperty('--xs', db.cfg.xs);
+        r.setProperty('--bg-head-pos', `center ${db.pos.head}%`);
+        r.setProperty('--bg-body-pos', `center ${db.pos.body}%`);
+        r.setProperty('--bg-rank-pos', `center ${db.pos['tab-rank']}%`);
+        r.setProperty('--bg-gift-pos', `center ${db.pos['tab-gift-shop']}%`);
+        if(db.bgs.body) document.body.style.backgroundImage = `url(${db.bgs.body})`;
+        if(db.bgs.head) document.getElementById('headerSection').style.backgroundImage = `url(${db.bgs.head})`;
+        ['tab-rank', 'tab-gift-shop'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el && db.bgs[id]) el.style.backgroundImage = `url(${db.bgs[id]})`;
+        });
+        document.getElementById('displayClassName').innerText = db.cls;
+        if(document.getElementById('scriptUrlInp')) document.getElementById('scriptUrlInp').value = db.scriptUrl || "";
+    }
+
+    function upPos(type, val) { db.pos[type] = val; apply(); save(); }
+    function upUI() {
+        db.cfg.pri = document.getElementById('cPri').value;
+        db.cfg.card = document.getElementById('cCard').value;
+        db.cfg.dat = document.getElementById('cDat').value;
+        db.cfg.tot = document.getElementById('cTot').value;
+        db.cfg.xs = document.getElementById('cXs').value;
+        apply(); save();
+    }
+    function upBg(e, t) {
+        const f = e.target.files[0];
+        const r = new FileReader();
+        r.onload = (ev) => { db.bgs[t] = ev.target.result; apply(); save(); };
+        r.readAsDataURL(f);
+    }
+    function upCls() { db.cls = document.getElementById('clsInp').value; apply(); save(); }
+
+    function getT(type) {
+        const d = new Date();
+        if(type === 'week') {
+            const diff = d.getDate() - d.getDay() + (d.getDay() === 0 ? -6 : 1);
+            return new Date(d.setDate(diff)).setHours(0,0,0,0);
+        }
+        if(type === 'prev-week') return getT('week') - (7*24*60*60*1000);
+        if(type === 'month') return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+        if(type === 'prev-month') return new Date(d.getFullYear(), d.getMonth() - 1, 1).getTime();
+        return 0;
+    }
+
+    function calc(s, t = 'all') {
+        let start = 0, end = Infinity;
+        if(t==='week' || t==='month') start = getT(t);
+        else if(t==='prev-week') { start = getT('prev-week'); end = getT('week'); }
+        else if(t==='prev-month') { start = getT('prev-month'); end = getT('month'); }
+        const r = { dat: 0, tot: 0, xs: 0, bad: 0, add: 0, redm: 0, total: 0, earned: 0, penaltyPoints: 0 };
+        s.history.forEach(h => {
+            if(h.time >= start && h.time < end) {
+                if(h.type === 'redm') r.redm += Math.abs(h.amt);
+                else { 
+                    r[h.type] += h.amt; 
+                    if(h.amt < 0) {
+                        r.bad += Math.abs(h.amt);
+                        const val = h.type === 'xs' ? 10 : (h.type === 'tot' ? 3 : 1);
+                        r.penaltyPoints += (Math.abs(h.amt) * val);
+                    } else r.add += h.amt;
+                }
+            }
+            if(h.type !== 'redm') {
+                const val = h.type === 'xs' ? 10 : (h.type === 'tot' ? 3 : 1);
+                r.earned += (h.amt * val);
+            }
+        });
+        r.total = (r.xs * 10) + (r.tot * 3) + (r.dat * 1) - r.redm;
+        return r;
+    }
+
+    function render() {
+        document.getElementById('studentGrid').innerHTML = db.students.map((s, i) => {
+            const p = calc(s, 'all');
+            return `<div class="card">
+                <span class="card-name" onclick="openD(${s.id})">${i+1}. ${s.name}</span>
+                <div class="stat-grid">
+                    <div class="stat-item"><span class="stat-lbl">📘 ĐẠT</span><span class="stat-num" style="color:var(--dat)">${p.dat}</span></div>
+                    <div class="stat-item"><span class="stat-lbl">✅ TỐT</span><span class="stat-num" style="color:var(--tot)">${p.tot}</span></div>
+                    <div class="stat-item"><span class="stat-lbl">⭐ X.SẮC</span><span class="stat-num" style="color:var(--xs)">${p.xs}</span></div>
+                </div>
+                <div class="btn-panel">
+                    ${['dat','tot','xs'].map(t => `<div class="btn-group"><button class="btn-circ btn-plus" onclick="update(${s.id},'${t}',1)">+</button><button class="btn-circ btn-minus" onclick="update(${s.id},'${t}',-1)">-</button></div>`).join('')}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function update(id, type, amt) {
+        const s = db.students.find(x => x.id === id);
+        const lbl = { dat: 'Đạt', tot: 'Tốt', xs: 'Xuất sắc' };
+        s.history.push({ type, amt, lbl: lbl[type], time: Date.now() });
+        save(); render();
+    }
+
+    function setRankType(t) {
+        const sorted = db.students.map(s => ({n:s.name, p:calc(s, t).total})).sort((a,b)=>b.p - a.p);
+        document.getElementById('btnRankW').classList.toggle('active', t === 'week');
+        document.getElementById('btnRankM').classList.toggle('active', t === 'month');
+        document.getElementById('btnRankAll').classList.toggle('active', t === 'all');
+        document.getElementById('top3Area').innerHTML = `
+            <div class="podium"><div class="podium-box p2">🥈<br>${sorted[1]?.p || 0}đ</div><small>${sorted[1]?.n || ''}</small></div>
+            <div class="podium"><div class="podium-box p1">🥇<br>${sorted[0]?.p || 0}đ</div><small><b>${sorted[0]?.n || ''}</b></small></div>
+            <div class="podium"><div class="podium-box p3">🥉<br>${sorted[2]?.p || 0}đ</div><small>${sorted[2]?.n || ''}</small></div>`;
+        document.getElementById('rankListFull').innerHTML = sorted.map((s,i)=>`<div class="list-item"><span>${i<3?`<span>${i===0?'🥇':i===1?'🥈':'🥉'}</span>`:''}${i+1}. ${s.n}</span><span>${s.p}đ</span></div>`).join('');
+        const resetContainer = document.getElementById('resetRankBtnContainer');
+        if(t === 'week' || t === 'month') {
+            resetContainer.innerHTML = `<button class="tab-btn" style="background:var(--danger); color:white" onclick="resetRankScore('${t}')">Xoá toàn bộ điểm ${t==='week'?'Tuần':'Tháng'} này</button>`;
+        } else { resetContainer.innerHTML = ''; }
+    }
+
+    function resetRankScore(type) {
+        if(!confirm(`Xác nhận xóa điểm ${type==='week'?'Tuần':'Tháng'}?`)) return;
+        const start = getT(type);
+        db.students.forEach(s => { s.history = s.history.filter(h => h.time < start || h.type === 'redm'); });
+        save(); setRankType(type);
+    }
+
+    function renderNoPoint() {
+        const list = db.students.filter(s => calc(s, 'week').add === 0);
+        document.getElementById('noPointView').innerHTML = `<h2 style="text-align:center">Chưa có điểm cộng tuần này</h2>` + (list.length ? list.map(s => `<div class="list-item"><span>${s.name}</span><span style="color:#999">Chưa có điểm</span></div>`).join('') : '<p style="text-align:center">Tất cả học sinh đều đã có điểm!</p>');
+    }
+
+    function renderPenalty() {
+        const sW = getT('week'), sM = getT('month');
+        let tW = 0, tM = 0;
+        db.students.forEach(s => s.penalties.forEach(p => { if(p.ts >= sW) tW++; if(p.ts >= sM) tM++; }));
+        document.getElementById('penaltyStats').innerHTML = `<div class="card" style="flex:1; background:var(--danger); color:white">Tuần: ${tW} lỗi</div><div class="card" style="flex:1; background:var(--primary); color:white">Tháng: ${tM} lỗi</div>`;
+        document.getElementById('penaltyStudentList').innerHTML = db.students.map(s => `
+            <div class="list-item" style="flex-direction:column; align-items:flex-start; gap:10px">
+                <div style="display:flex; justify-content:space-between; width:100%">
+                    <b>${s.name}</b>
+                    <button class="tab-btn" style="padding:5px 10px" onclick="viewP(${s.id})">Lịch sử (${s.penalties.length})</button>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:5px">
+                    ${QUICK_ERRORS.map(err => `<span class="quick-tag" onclick="fastAddP(${s.id},'${err}')">${err}</span>`).join('')}
+                </div>
+                <div style="display:flex; gap:5px; width:100%">
+                    <input type="text" id="p-in-${s.id}" class="input-std" placeholder="Lỗi khác...">
+                    <button class="tab-btn" style="background:var(--danger); color:white" onclick="addP(${s.id})">Lưu</button>
+                </div>
+            </div>`).join('');
+    }
+
+    function fastAddP(sid, msg) {
+        db.students.find(x=>x.id===sid).penalties.push({ id: Date.now(), txt: msg, ts: Date.now(), dt: new Date().toLocaleString() });
+        save(); renderPenalty();
+    }
+    function addP(sid) {
+        const val = document.getElementById(`p-in-${sid}`).value;
+        if(!val) return;
+        fastAddP(sid, val);
+        document.getElementById(`p-in-${sid}`).value = '';
+    }
+
+    function viewP(sid) {
+        const s = db.students.find(x=>x.id===sid);
+        document.getElementById('penModalTitle').innerText = "Lỗi: " + s.name;
+        document.getElementById('penModalList').innerHTML = s.penalties.map(p => `<div class="list-item"><span><small>${p.dt}</small><br>${p.txt}</span><div><button onclick="editP(${sid},${p.id})" style="color:blue; border:none; background:none">Sửa</button><button onclick="delP(${sid},${p.id})" style="color:red; border:none; background:none">Xóa</button></div></div>`).join('') || "Chưa có lỗi.";
+        document.getElementById('penModal').style.display = 'block';
+    }
+    function delP(sid, pid) { const s = db.students.find(x=>x.id===sid); s.penalties = s.penalties.filter(x=>x.id!==pid); save(); renderPenalty(); viewP(sid); }
+    function editP(sid, pid) { const s = db.students.find(x=>x.id===sid); const p = s.penalties.find(x=>x.id===pid); const n = prompt("Sửa lỗi:", p.txt); if(n) { p.txt = n; save(); renderPenalty(); viewP(sid); } }
+
+    function showHist(m) {
+        const v = document.getElementById('historyView');
+        document.getElementById('btnHistLog').classList.toggle('active', m==='logs');
+        document.getElementById('btnHistTop').classList.toggle('active', m==='prev');
+        if(m==='logs') {
+            let logs = []; db.students.forEach(s => s.history.forEach(h => logs.push({n:s.name, ...h})));
+            logs.sort((a,b)=>b.time-a.time);
+            v.innerHTML = logs.map(l => `<div class="list-item ${l.amt<0?'text-red':''}"><span>${l.n}: ${l.amt>0?'Cộng':'Trừ'} ${l.lbl}</span><small>${new Date(l.time).toLocaleString()}</small></div>`).join('');
+        } else {
+            const getTopPoints = (t) => db.students.map(s => ({ n: s.name, p: calc(s, t).total })).sort((a, b) => b.p - a.p).slice(0, 5);
+            const getTopPenalty = (t) => db.students.map(s => {
+                const sTime = getT(t);
+                const count = s.penalties.filter(p => p.ts >= sTime).length;
+                return { n: s.name, c: count };
+            }).filter(x => x.c > 0).sort((a, b) => b.c - a.c).slice(0, 5);
+
+            const pointsW = getTopPoints('week'); const pointsM = getTopPoints('month');
+            const badW = getTopPenalty('week'); const badM = getTopPenalty('month');
+            
+            v.innerHTML = `
+                <div class="hist-section">
+                    <div class="section-title">🥇 Top 5 Bảng Vàng Tuần Này</div>
+                    ${pointsW.map((s,i)=>`<div class="list-item"><span>${i+1}. ${s.n}</span><span>${s.p}đ</span></div>`).join('') || '<p>Chưa có dữ liệu</p>'}
+                    <div class="section-title" style="color:var(--danger)">🚨 Top 5 Vi Phạm Tuần Này</div>
+                    ${badW.map((s,i)=>`<div class="list-item text-red"><span>${i+1}. ${s.n}</span><span>${s.c} lỗi</span></div>`).join('') || '<p>Không có vi phạm</p>'}
+                </div>
+                <div class="hist-section" style="border-top: 3px double #ddd; padding-top: 20px;">
+                    <div class="section-title">🏆 Top 5 Bảng Vàng Tháng Này</div>
+                    ${pointsM.map((s,i)=>`<div class="list-item"><span>${i+1}. ${s.n}</span><span>${s.p}đ</span></div>`).join('') || '<p>Chưa có dữ liệu</p>'}
+                    <div class="section-title" style="color:var(--danger)">🚨 Top 5 Vi Phạm Tháng Này</div>
+                    ${badM.map((s,i)=>`<div class="list-item text-red"><span>${i+1}. ${s.n}</span><span>${s.c} lỗi</span></div>`).join('') || '<p>Không có vi phạm</p>'}
+                </div>`;
+        }
+    }
+
+    function addS() { const n = document.getElementById('newSName').value; if(n) { db.students.push({ id: Date.now(), name: n.trim(), history: [], penalties: [] }); save(); render(); renderAdminS(); document.getElementById('newSName').value=''; } }
+    function addBulkS() {
+        const text = document.getElementById('bulkSName').value; if(!text.trim()) return;
+        const names = text.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+        names.forEach((n, i) => { db.students.push({ id: Date.now() + i, name: n, history: [], penalties: [] }); });
+        save(); render(); renderAdminS(); document.getElementById('bulkSName').value = '';
+    }
+    function delS(id) { if(confirm("Xóa HS này?")) { db.students = db.students.filter(x => x.id !== id); save(); render(); renderAdminS(); } }
+    function editS(id) { const n = prompt("Sửa tên:"); if(n) { db.students.find(x=>x.id===id).name = n.trim(); save(); render(); renderAdminS(); } }
+    function renderAdminS() { document.getElementById('adminSList').innerHTML = db.students.map(s => `<div class="list-item"><span>${s.name}</span><div><button onclick="editS(${s.id})" style="color:blue; border:none; background:none">Sửa</button> <button onclick="delS(${s.id})" style="color:red; border:none; background:none">Xóa</button></div></div>`).join(''); }
+    function addG() {
+        const name = document.getElementById('gN').value, point = parseInt(document.getElementById('gP').value), file = document.getElementById('gI').files[0];
+        const g = { id: Date.now(), name, point, img: null };
+        if(file) { const r = new FileReader(); r.onload = (e) => { g.img = e.target.result; db.gifts.push(g); save(); renderG(); }; r.readAsDataURL(file); }
+        else { db.gifts.push(g); save(); renderG(); }
+    }
+    function renderG() {
+        document.getElementById('giftGrid').innerHTML = db.gifts.map(g => `<div class="card"><img src="${g.img||''}" style="width:100%; height:100px; object-fit:cover; border-radius:10px"><b>${g.name}</b><br><span>${g.point}đ</span><select id="sel-${g.id}" class="input-std">${db.students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select><button class="tab-btn" style="background:var(--gift); color:white; width:100%" onclick="buy(${g.id})">Đổi quà</button><button onclick="delG(${g.id})" style="color:red; border:none; background:none">Xóa quà</button></div>`).join('');
+        document.getElementById('redeemLogs').innerHTML = db.redeems.map(r => `<div class="list-item"><span>${r.s} đổi ${r.g}</span><small>${r.t}</small></div>`).join('');
+    }
+    function buy(gid) {
+        const sid = parseInt(document.getElementById(`sel-${gid}`).value);
+        const s = db.students.find(x => x.id === sid), g = db.gifts.find(x => x.id === gid);
+        if(calc(s, 'all').total < g.point) return alert("Không đủ điểm!");
+        s.history.push({ type: 'redm', amt: -g.point, lbl: `Đổi ${g.name}`, time: Date.now() });
+        db.redeems.unshift({ s: s.name, g: g.name, t: new Date().toLocaleString() });
+        save(); renderG(); render();
+    }
+    function delG(id) { db.gifts = db.gifts.filter(x => x.id !== id); save(); renderG(); }
+
+    function showTab(t) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById('tab-' + t).classList.remove('hidden');
+        document.querySelectorAll('.nav-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+        if(t==='rank') setRankType('week');
+        if(t==='no-point') renderNoPoint();
+        if(t==='gift-shop') renderG();
+        if(t==='admin') renderAdminS();
+        if(t==='history') showHist('logs');
+        if(t==='penalty') renderPenalty();
+    }
+
+    function openD(id) {
+        const s = db.students.find(x => x.id === id); 
+        const p = calc(s, 'all'); 
+        document.getElementById('modalBody').innerHTML = `
+            <div style="padding:20px">
+                <h2 style="text-align:center; color:var(--primary); margin-top:0">${s.name}</h2><hr>
+                <div class="list-item"><span>📘 Số lần Đạt:</span><span style="color:var(--dat)">${p.dat}</span></div>
+                <div class="list-item"><span>✅ Số lần Tốt:</span><span style="color:var(--tot)">${p.tot}</span></div>
+                <div class="list-item"><span>⭐ Số lần Xuất sắc:</span><span style="color:var(--xs)">${p.xs}</span></div>
+                <div class="list-item text-red"><span>⚠️ Số lỗi vi phạm:</span><span>${s.penalties.length}</span></div>
+                <div class="list-item text-red"><span>📉 Tổng số điểm bị trừ:</span><span>-${p.penaltyPoints}đ</span></div>
+                <div class="list-item"><span>🎁 Điểm đã đổi quà:</span><span style="color:var(--gift)">-${p.redm}đ</span></div>
+                <div class="list-item" style="border-top:1px dashed #ccc; margin-top:10px; padding-top:10px">
+                    <span>🏆 Tổng điểm đạt được:</span><b>${p.earned}đ</b>
+                </div>
+                <div style="background:var(--primary); color:white; padding:15px; border-radius:15px; margin-top:15px; text-align:center">
+                    <small>SỐ DƯ HIỆN TẠI</small><h1 style="margin:0">${p.total}đ</h1>
+                </div>
+                <button class="tab-btn" style="width:100%; margin-top:15px; background:#eee" onclick="closeModal('detailModal')">Đóng</button>
+            </div>`;
+        document.getElementById('detailModal').style.display='block';
+    }
+
+    function resetAllWithPw() {
+        const pw = document.getElementById('adminPw').value;
+        if(pw === "1234") { if(confirm("Cảnh báo: Thao tác này sẽ xoá sạch mọi dữ liệu. Tiếp tục?")) { localStorage.removeItem(KEY); location.reload(); } }
+        else { alert("Mật khẩu không đúng!"); }
+    }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    apply(); render();
+</script>
+</body>
+</html>
